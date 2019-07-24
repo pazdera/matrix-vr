@@ -1,0 +1,15 @@
+{
+  "name": "matrix-vr",
+  "version": "1.0.0",
+  "description": "The construct and digital rain from The Matrix in WebVR.",
+  "main": "src/index.js",
+  "scripts": {
+    "serve": "http-server .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Radek Pazdera <me@radek.io>",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.11.1"
+  }
+}
