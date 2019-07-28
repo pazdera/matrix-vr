@@ -15,7 +15,8 @@ import {
 	UniformsUtils,
 	Vector2,
 	Vector3,
-	WebGLRenderTarget
+	WebGLRenderTarget,
+	GammaEncoding
 } from "../../../build/three.module.js";
 import { Pass } from "../postprocessing/Pass.js";
 import { CopyShader } from "../shaders/CopyShader.js";
@@ -214,6 +215,7 @@ UnrealBloomPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 			this.fsQuad.material = this.basic;
 			this.basic.map = readBuffer.texture;
+			this.basic.map.encoding = GammaEncoding;
 
 			renderer.setRenderTarget( null );
 			renderer.clear();

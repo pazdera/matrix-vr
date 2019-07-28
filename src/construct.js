@@ -12,7 +12,7 @@ const MODELS = {
 export const construct = {
     object: null,
 
-    load() {
+    load(progressCallback) {
         return new Promise((resolve, reject) => {
             const ids = Object.keys(MODELS);
             const objects = {};
@@ -28,17 +28,21 @@ export const construct = {
                         if (Object.keys(objects).length === ids.length) {
                             resolve(objects);
                         }
+                        if (typeof progressCallback === 'function') {
+                            progressCallback(Object.keys(objects).length / ids.length);
+                        }
                     },
                     null,
                     (error) => {
                         reject(error);
+
                     }
                 );
             });
         });
     },
 
-    setup() {
+    setup(progressCallback) {
         const construct = new THREE.Group();
         this.object = construct;
 
@@ -73,7 +77,7 @@ export const construct = {
         var light3 = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
         construct.add(light3);
 
-        return this.load()
+        return this.load(progressCallback)
             .then((objects) => {
                 // Chairs
                 const chair1 = objects.chair;
