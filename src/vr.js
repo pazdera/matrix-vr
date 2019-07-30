@@ -169,6 +169,10 @@ export class EnterVR {
         return this.api.state;
     }
 
+    get available() {
+        return this.api && ['ready', 'in-progress'].indexOf(this.api.state) >= 0;
+    }
+
     prepare(renderer) {
         if (this.api) {
             if (this.onStateChange) {

@@ -124,7 +124,7 @@ export class Particle {
     }
 }
 
-export class InstancedSystem {
+export class DigitalRain {
     get vertexShader() {
         return `
             precision highp float;
@@ -260,10 +260,8 @@ export class InstancedSystem {
             const y = (0.5 + Math.random() * 20) * (Math.random() > 0.5 ? 1 : -1);
             const z = (0.5 + Math.random() * 50) * (Math.random() > 0.5 ? 1 : -1);
             const length = Math.floor(10 + Math.random() * 35);
-            // const length = 60;
             const speed = Math.floor(40 + Math.random() * 40);
 
-            // How to apply rotation in a vertex shader?
             const yRotation = Math.atan2(x, z);
             const q = new THREE.Quaternion();
             q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yRotation);

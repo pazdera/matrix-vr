@@ -5,11 +5,21 @@
   "main": "src/index.js",
   "scripts": {
     "serve": "http-server .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c && replace-in-file --configFile replace.config.js",
+    "serve-prod": "node serve-prod.js"
   },
   "author": "Radek Pazdera <me@radek.io>",
   "license": "MIT",
   "dependencies": {
     "http-server": "^0.11.1"
+  },
+  "devDependencies": {
+    "express": "^4.17.1",
+    "replace-in-file": "^4.1.1",
+    "rollup": "^1.17.0",
+    "rollup-plugin-copy": "^3.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0"
   }
 }
