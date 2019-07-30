@@ -1,0 +1,212 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5123,
+            "count": 9216,
+            "type": "SCALAR"
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 1630,
+            "type": "VEC3",
+            "max": [
+                100.0,
+                100.0,
+                100.0
+            ],
+            "min": [
+                -100.0,
+                -100.0,
+                -100.0
+            ]
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 1630,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 3,
+            "componentType": 5126,
+            "count": 1630,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 4,
+            "componentType": 5126,
+            "count": 1630,
+            "type": "VEC4"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 18432,
+            "target": 34963
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 18432,
+            "byteLength": 19560,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 37992,
+            "byteLength": 19560,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 57552,
+            "byteLength": 13040,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 70592,
+            "byteLength": 26080,
+            "target": 34962
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 96672,
+            "uri": "scene.bin"
+        }
+    ],
+    "images": [
+        {
+            "uri": "1-8x8.png",
+            "mimeType": "image/png"
+        },
+        {
+            "uri": "2-8x8.png",
+            "mimeType": "image/png"
+        },
+        {
+            "uri": "192008321_8x8.png",
+            "mimeType": "image/png"
+        },
+        {
+            "uri": "192008699_8x8.png",
+            "mimeType": "image/png"
+        }
+    ],
+    "materials": [
+        {
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {
+                    "index": 2
+                },
+                "metallicRoughnessTexture": {
+                    "index": 3
+                }
+            },
+            "name": "68",
+            "doubleSided": true,
+            "extensions": {
+                "KHR_materials_pbrSpecularGlossiness": {
+                    "diffuseTexture": {
+                        "index": 0
+                    },
+                    "specularGlossinessTexture": {
+                        "index": 1
+                    }
+                }
+            },
+            "extras": {
+                "MSFT_sRGBFactors": false
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "mesh_id27",
+            "primitives": [
+                {
+                    "attributes": {
+                        "NORMAL": 2,
+                        "POSITION": 1,
+                        "TEXCOORD_0": 3,
+                        "COLOR_0": 4
+                    },
+                    "indices": 0,
+                    "material": 0
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "children": [
+                1
+            ],
+            "name": "root"
+        },
+        {
+            "translation": [
+                0.009667403995990754,
+                0.044881124049425128,
+                0.25196796655654909
+            ],
+            "rotation": [
+                1.862645371275562e-9,
+                0.5875526070594788,
+                3.725290742551124e-9,
+                0.8091860413551331
+            ],
+            "scale": [
+                0.0012759258970618249,
+                0.0024682709481567146,
+                0.0011136417742818595
+            ],
+            "mesh": 0
+        }
+    ],
+    "samplers": [
+        {
+            "minFilter": 9985
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "textures": [
+        {
+            "name": "0",
+            "sampler": 0,
+            "source": 0
+        },
+        {
+            "name": "1",
+            "sampler": 0,
+            "source": 1
+        },
+        {
+            "name": "2",
+            "sampler": 0,
+            "source": 2
+        },
+        {
+            "name": "3",
+            "sampler": 0,
+            "source": 3
+        }
+    ],
+    "scene": 0,
+    "extensionsUsed": [
+        "KHR_materials_pbrSpecularGlossiness"
+    ]
+}
