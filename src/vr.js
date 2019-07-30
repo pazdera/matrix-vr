@@ -75,7 +75,6 @@ export class WebVR extends VXR {
             .then((displays) => {
                 if (displays.length > 0) {
                     this.display = displays[0];
-                    console.log(this.display);
                     this.state = 'ready';
                 } else {
                     this.state = 'not-available';

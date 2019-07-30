@@ -1,4 +1,4 @@
-export function ease(duration, fps, callback, easing = EasingFunctions.linear) {
+export function animate(duration, fps, callback, easing = EasingFunctions.linear) {
     let t = 0;
     let steps = (duration / 1000) * fps;
     let tick = duration / steps;

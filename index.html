@@ -254,10 +254,28 @@
             border-width: 15px;
             margin-left: -15px;
         }
+        .toggle-vr {
+            position: fixed;
+            bottom: 10px;
+            margin: auto;
+            min-width: auto;
+            width: 66px;
+            left: calc(50% - 33px);
+            display: none;
+        }
+        .toggle-vr .headset {
+            margin: 0px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <canvas class="fade" id="canvas"></canvas>
+    <button class="toggle-vr">
+        <svg class="headset" viewBox="0 0 385 230" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentcolor">
+            <path d="M265.253901,230 C255.88825,228.652069 249.110473,225.513139 240.549202,211.583073 C230.587092,195.373699 217.913704,150.712399 192.554743,150.639683 C167.195783,150.566966 150.365282,196.868603 142.463044,211.583073 C137.217473,221.350661 129.581311,227.489637 119.55456,230 L32,230 C14.326888,230 2.164332e-15,215.673112 0,198 L0,32 L0,32 C-2.164332e-15,14.326888 14.326888,3.24649801e-15 32,0 L32,0 L353,0 C370.673112,-3.46402514e-14 385,14.326888 385,32 L385,198 L385,198 C385,215.673112 370.673112,230 353,230 L265.253901,230 Z M104,149 C128.852814,149 149,128.852814 149,104 C149,79.1471863 128.852814,59 104,59 C79.1471863,59 59,79.1471863 59,104 C59,128.852814 79.1471863,149 104,149 Z M280,149 C304.852814,149 325,128.852814 325,104 C325,79.1471863 304.852814,59 280,59 C255.147186,59 235,79.1471863 235,104 C235,128.852814 255.147186,149 280,149 Z" fill="#ffffff"></path>
+        </svg>
+    </button>
     <div class="overlay">
         <div class="menu">
             <a href="https://github.com/pazdera/matrix-vr#credits">Credits</a>
@@ -297,14 +315,18 @@
         import * as THREE from './vendor/three/build/three.module.js';
         import { OrbitControls } from './vendor/three/examples/jsm/controls/OrbitControls.js';
         import { EffectComposer } from './vendor/three/examples/jsm/postprocessing/EffectComposer.js';
-        import { RenderPass } from './vendor/three/examples/jsm/postprocessing/RenderPass.js';
+        // import { RenderPass } from './vendor/three/examples/jsm/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from './vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+        import { ShaderPass } from './vendor/three/examples/jsm/postprocessing/ShaderPass.js';
+        import { CopyShader } from './vendor/three/examples/jsm/shaders/CopyShader.js';
+        import { FXAAShader } from './vendor/three/examples/jsm/shaders/FXAAShader.js';
 
         import { construct } from './src/construct.js';
         import { Particle, InstancedSystem } from './src/particles.js';
         import { sfx } from './src/sfx.js';
         import { EnterVR } from './src/vr.js';
-        import { ease, tween, EasingFunctions } from './src/tween.js';
+        import { animate, tween, EasingFunctions } from './src/tween.js';
 
         const ui = {
             buttons: document.querySelector('.buttons'),
@@ -316,6 +338,8 @@
 
             loading: document.querySelector('.loading'),
             progressBar: document.querySelector('#progress-bar'),
+
+            toggleVR: document.querySelector('.toggle-vr'),
 
             renderer: null,
 
@@ -351,10 +375,21 @@
                         start();
                     }
                 });
+                this.toggleVR.addEventListener('click', () => {
+                    if (vr.state === 'in-progress') {
+                        vr.endSession();
+                    }
+                    if (vr.state === 'ready') {
+                        vr.startSession();
+                    }
+                });
             },
             hideOverlay() {
                 this.overlay.style.display = 'none';
                 this.overlay.style.pointerEvents = 'none';
+            },
+            showToggleVR(flag) {
+                this.toggleVR.style.display = flag ? 'block' : 'none';
             }
         };
 
@@ -364,7 +399,7 @@
         // canvas.width = canvas.clientWidth;
         // canvas.height = canvas.clientHeight;
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+        const renderer = new THREE.WebGLRenderer({ canvas });
         ui.renderer = renderer;
         renderer.physicallyCorrectLights = true;
         renderer.gammaOutput = true;
@@ -378,17 +413,21 @@
             switch (state) {
                 case 'ready':
                     ui.displayButton('vr');
+                    ui.showToggleVR(ui.overlay.style.display === 'none');
                     break;
                 case 'in-progress':
+                    ui.showToggleVR(true);
                     break;
                 case 'uninitialised':
                 case 'not-available':
                 default:
                     ui.displayButton('360');
+                    ui.showToggleVR(false);
                     break;
             }
         };
 
+        vr.prepare(renderer);
         ui.setupListeners(vr);
 
         /* Create scene */
@@ -402,9 +441,7 @@
         /* Horizontal display */
         if (aspect < 1) {
             fov = 70;
-            cameraPosition.x = -4;
-            cameraPosition.y = 1.5;
-            cameraPosition.z = -4;
+            cameraPosition = { x: -4, y: 1.5, z: -4 };
         }
         const near = 0.1;
         const far = 1000;
@@ -432,7 +469,6 @@
         /* Setup post-processing */
         const composer = new EffectComposer(renderer);
         const bloom = new UnrealBloomPass(
-            // new THREE.Vector2(canvas.width, canvas.height),
             new THREE.Vector2(256, 256),
             1.0,
             0.5,
@@ -451,13 +487,8 @@
         introRenderLoop();
 
         window.addEventListener('resize', () => {
-            // canvas.width = canvas.clientWidth * window.devicePixelRatio;
-            // canvas.height = canvas.clientHeight * window.devicePixelRatio;
-            // renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
             composer.setSize(canvas.clientWidth, canvas.clientHeight);
-            // composer.setPixelRatio(window.devicePixelRatio);
-            // renderer.setPixelRatio(window.devicePixelRatio);
 
             camera.aspect = canvas.width / canvas.height;
             camera.updateProjectionMatrix();
@@ -506,12 +537,15 @@
                 renderLoop360(controls);
             }
 
-            scene.fog = new THREE.Fog(0xffffff, 0.1, 200);
+            // const fog = new THREE.Fog(0xffffff, 0.1, 200);
+            // if (vr.state === 'not-available') {
+            //     scene.fog = fog;
+            // }
             setTimeout(() => {
                 const startFov = camera.fov;
                 const startPos = Object.assign({}, camera.position);
                 let newStartPos;
-                ease(2000, 30, (n) => {
+                animate(2000, 30, (n) => {
                     let x;
                     let y;
                     let z;
@@ -526,7 +560,7 @@
 
                     camera.lookAt(0, 0.6, 0);
                     camera.updateProjectionMatrix();
-                    scene.fog.far = tween(200, 0.1, n);
+                    // fog.far = tween(200, 0.1, n);
                 }, EasingFunctions.easeInQuad).then(() => {
                     if (vr.state === 'ready') {
                         renderer.vr.enabled = true;
@@ -552,12 +586,12 @@
                         window.controls = controls;
                     }
                     setTimeout(() => {
-                        ease(3000, 30, (n) => {
-                            scene.fog.far = tween(0.1, 200, n);
+                        animate(3000, 30, (n) => {
+                            // fog.far = tween(0.1, 200, n);
                         }).then(() => {
                             scene.fog = null;
                         });
-                        // setTimeout(switchScenes, 10000);
+                        setTimeout(switchScenes, 10000);
                     }, 1000);
                 });
             }, vr.state === 'ready' ? 1200 : 1300);
@@ -596,24 +630,14 @@
             return requestAnimationFrame(loop);
         }
 
-        vr.prepare(renderer);/*.then(() => {
-            if (vr.state === 'ready') {
-                // renderer.vr.enabled = true;
-            } else {
-            }
-        }).catch((e) => { throw e; });*/
-
         // const axesHelper = new THREE.AxesHelper( 5 );
         // scene.add( axesHelper );
 
         function switchScenes() {
             scene.add(drops.mesh);
 
-            // Trigger some particles
-            // addParticle(10, 10, 10, 10);
             sfx.effects.storm.stop();
             sfx.effects.drop.play();
-            // controls.autoRotate = false;
 
             particles.forEach(p => p.show());
             bloom.strength = 1.0;
@@ -641,7 +665,7 @@
                 }, 8000);
             }, 1000);
 
-            ease(1500, 30, (n) => {
+            animate(1500, 30, (n) => {
                 const rN = 1 - n;
                 construct.object.position.y = tween(0, -20, n);
                 scene.background.setRGB(rN, rN, rN);
