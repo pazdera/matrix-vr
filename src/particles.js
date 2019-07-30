@@ -42,9 +42,6 @@ const fragmentShader = `
         float index = floor(vUv2.y / (1.0 / length));
 
         float step = floor(time / speed);
-        // if (step > length) {
-        //     index = index - (step - length);
-        // }
 
         // vec3 baseColor = vec3(0.250, 1, 0.250);
         vec3 baseColor = vec3(0.066, 0.894, 0.270);
@@ -67,7 +64,7 @@ const fragmentShader = `
 
         float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
         float alpha = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
-        gl_FragColor = vec4(baseColor, (alpha - fade));
+        gl_FragColor = vec4(baseColor * (alpha - fade), 1.0);
     }
 `;
 
@@ -134,6 +131,7 @@ export class InstancedSystem {
 
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
+            uniform float baseLength;
 
             attribute vec3 position;
             attribute vec2 uv;
@@ -145,6 +143,7 @@ export class InstancedSystem {
             varying vec2 vUv;
             varying float vLength;
             varying float vSpeed;
+            varying float vFade;
 
             // http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
             vec3 applyQuaternionToVector(vec4 q, vec3 v) {
@@ -155,18 +154,18 @@ export class InstancedSystem {
                 vUv = uv;
                 vLength = length;
                 vSpeed = speed;
+                vFade = (1.0 - sqrt(offset.x*offset.x + offset.y*offset.y) / 100.0);
 
                 vec3 vPosition = applyQuaternionToVector(rotation, position);
+                vec3 displacement = offset - vec3(0.0, floor((baseLength - vLength) / 2.0), 0.0);
 
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(offset + vPosition, 1.0);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(displacement + vPosition, 1.0);
             }
         `;
     }
     get fragmentShader() {
         return `
             precision highp float;
-
-            // #include <common>
 
             #define FONT_W 8.0
             #define FONT_H 8.0
@@ -180,15 +179,16 @@ export class InstancedSystem {
             uniform sampler2D font;
 
             varying vec2 vUv;
-            varying float vSpeed;
             varying float vLength;
+            varying float vSpeed;
+            varying float vFade;
 
             float median(float r, float g, float b) {
                 return max(min(r, g), min(max(r, g), b));
             }
 
-            float rand(float seed) {
-                return fract(sin(dot(vec2(seed, seed), vec2(12.9898, 78.233))) * 43758.5453123);
+            float rand(float s) {
+                return fract(sin(dot(vec2(s, s), vec2(12.9898, 78.233))) * 43758.5453123);
             }
 
             void main() {
@@ -232,7 +232,7 @@ export class InstancedSystem {
 
                 float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
                 float alpha = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
-                gl_FragColor = vec4(baseColor, (alpha - fade));
+                gl_FragColor = vec4(baseColor * vFade, (alpha - fade));
             }
         `;
     }
@@ -251,11 +251,15 @@ export class InstancedSystem {
         const lengths = [];
         const speeds = [];
 
+        this.instances = instances;
+        this.updateIndex = 0;
+        this.lastAttrUpdate = 0;
+
         for (let i = 0; i < instances; i++) {
             const x = (0.5 + Math.random() * 50) * (Math.random() > 0.5 ? 1 : -1);
             const y = (0.5 + Math.random() * 20) * (Math.random() > 0.5 ? 1 : -1);
             const z = (0.5 + Math.random() * 50) * (Math.random() > 0.5 ? 1 : -1);
-            const length = Math.floor(10 + Math.random() * 20);
+            const length = Math.floor(10 + Math.random() * 35);
             // const length = 60;
             const speed = Math.floor(40 + Math.random() * 40);
 
@@ -273,7 +277,7 @@ export class InstancedSystem {
         const offsetsAttr = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
         const rotationAttr = new THREE.InstancedBufferAttribute(new Float32Array(rotations), 4);
         const lengthsAttr = new THREE.InstancedBufferAttribute(new Float32Array(lengths), 1);
-        const speedsAttr = new THREE.InstancedBufferAttribute(new Float32Array(speeds), 1).setDynamic(true);
+        const speedsAttr = new THREE.InstancedBufferAttribute(new Float32Array(speeds), 1);
 
         geometry.addAttribute('offset', offsetsAttr);
         geometry.addAttribute('rotation', rotationAttr);
