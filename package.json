@@ -7,7 +7,8 @@
     "serve": "http-server .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c && replace-in-file --configFile replace.config.js",
-    "serve-prod": "node serve-prod.js"
+    "serve-prod": "node serve-prod.js",
+    "deploy": "gh-pages -d dist"
   },
   "author": "Radek Pazdera <me@radek.io>",
   "license": "MIT",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "express": "^4.17.1",
+    "gh-pages": "^2.0.1",
     "replace-in-file": "^4.1.1",
     "rollup": "^1.17.0",
     "rollup-plugin-copy": "^3.1.0",

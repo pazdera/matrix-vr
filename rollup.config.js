@@ -2,7 +2,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import copy from 'rollup-plugin-copy';
 import replace from 'rollup-plugin-replace';
 
-const distDir = './docs'
+const distDir = './dist'
 
 export default {
     input: 'src/index.js',

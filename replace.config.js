@@ -1,5 +1,5 @@
 module.exports = {
-    files: './docs/index.html',
+    files: './dist/index.html',
     from: [
         /\/assets\//g,
         /type="module"/g,
