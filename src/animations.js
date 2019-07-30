@@ -1,3 +1,4 @@
+/* Basic tweening */
 export function animate(duration, fps, callback, easing = EasingFunctions.linear) {
     let t = 0;
     let steps = (duration / 1000) * fps;
@@ -20,7 +21,7 @@ export function animate(duration, fps, callback, easing = EasingFunctions.linear
     return new Promise(run);
 }
 
-export function tween(from, to, n) {
+export function lerp(from, to, n) {
     return from + (to - from) * n;
 }
 
