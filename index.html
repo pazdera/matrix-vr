@@ -315,12 +315,7 @@
         import * as THREE from './vendor/three/build/three.module.js';
         import { OrbitControls } from './vendor/three/examples/jsm/controls/OrbitControls.js';
         import { EffectComposer } from './vendor/three/examples/jsm/postprocessing/EffectComposer.js';
-        // import { RenderPass } from './vendor/three/examples/jsm/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from './vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js';
-
-        import { ShaderPass } from './vendor/three/examples/jsm/postprocessing/ShaderPass.js';
-        import { CopyShader } from './vendor/three/examples/jsm/shaders/CopyShader.js';
-        import { FXAAShader } from './vendor/three/examples/jsm/shaders/FXAAShader.js';
 
         import { construct } from './src/construct.js';
         import { Particle, InstancedSystem } from './src/particles.js';
@@ -340,8 +335,6 @@
             progressBar: document.querySelector('#progress-bar'),
 
             toggleVR: document.querySelector('.toggle-vr'),
-
-            renderer: null,
 
             displayButton(type) {
                 if (type === 'vr') {
@@ -394,19 +387,30 @@
         };
 
         const canvas = document.querySelector('#canvas');
-        let landscapeFOV = 20;
-        let mobileFOV = 70;
-        // canvas.width = canvas.clientWidth;
-        // canvas.height = canvas.clientHeight;
 
+        /* Renderer setup */
         const renderer = new THREE.WebGLRenderer({ canvas });
-        ui.renderer = renderer;
         renderer.physicallyCorrectLights = true;
         renderer.gammaOutput = true;
         renderer.gammaFactor = 2.2;
         renderer.setClearColor(0xffffff);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+        /* Setup postprocessing */
+        const composer = new EffectComposer(renderer);
+        const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0, 0.5, 0);
+        bloom.renderToScreen = true;
+        composer.addPass(bloom);
+
+        /* Create scene */
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+
+        renderer.setRenderTarget(composer.readBuffer);
+        scene.onAfterRender = () => {
+            composer.render();
+        };
 
         const vr = new EnterVR();
         vr.onStateChange = (state) => {
@@ -416,7 +420,8 @@
                     ui.showToggleVR(ui.overlay.style.display === 'none');
                     break;
                 case 'in-progress':
-                    ui.showToggleVR(true);
+                    /* Delay showing the button to prevent flickering */
+                    setTimeout(() => ui.showToggleVR(true), 500);
                     break;
                 case 'uninitialised':
                 case 'not-available':
@@ -430,29 +435,30 @@
         vr.prepare(renderer);
         ui.setupListeners(vr);
 
-        /* Create scene */
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-
         /* Setup camera */
+        let landscapeFOV = 20;
+        let portraitFOV = 70;
         const aspect = canvas.width / canvas.height;
-        let fov = 20;
-        let cameraPosition = { x: -7.6, y: 1.3, z: -7.6 };
-        /* Horizontal display */
-        if (aspect < 1) {
-            fov = 70;
-            cameraPosition = { x: -4, y: 1.5, z: -4 };
-        }
-        const near = 0.1;
-        const far = 1000;
-        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        camera.up = new THREE.Vector3(0, 1, 0);
+        let fov = aspect >= 1 ? landscapeFOV : portraitFOV;
+        let cameraPosition = aspect >= 1 ? { x: -7.6, y: 1.3, z: -7.6 } : { x: -4, y: 1.5, z: -4 };
+        const camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 500);
         camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        camera.up = new THREE.Vector3(0, 1, 0);
         camera.lookAt(0, 0.6, 0);
+
+        window.addEventListener('resize', () => {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            renderer.setSize(w, h, false);
+            composer.setSize(w, h);
+
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        });
 
         /* Start loading assets */
         const sfxPromise = sfx.load();
-        const constructPromise = construct.setup(ui.updateProgress.bind(ui));
+        const constructPromise = construct.setup((p) => ui.updateProgress(p));
         Promise.all([sfxPromise, constructPromise]).then(() => {
             scene.add(construct.object);
             construct.reflectCamera.update(renderer, scene);
@@ -461,44 +467,15 @@
             sfx.setupEffects(camera);
 
             ui.hideProgress();
-            setTimeout(() => {
-                ui.fadeIn();
-            }, 600);
+            setTimeout(() => ui.fadeIn(), 600);
         });
 
-        /* Setup post-processing */
-        const composer = new EffectComposer(renderer);
-        const bloom = new UnrealBloomPass(
-            new THREE.Vector2(256, 256),
-            1.0,
-            0.5,
-            0.3,
-        );
-        bloom.renderToScreen = true;
-        bloom.strength = 0;
-        composer.addPass(bloom);
-
-        renderer.setRenderTarget(composer.readBuffer);
-        scene.onAfterRender = () => {
-            composer.render();
-        };
-
-        let introRender = null
+        let introRender = null;
         introRenderLoop();
 
-        window.addEventListener('resize', () => {
-            renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-            composer.setSize(canvas.clientWidth, canvas.clientHeight);
-
-            camera.aspect = canvas.width / canvas.height;
-            camera.updateProjectionMatrix();
-        });
-
         // REMOVE
-        window.camera = camera;
-        // window.render = () => renderer.render(scene, camera);
+        // window.camera = camera;
 
-        const particles = [];
         let controls;
         const drops = new InstancedSystem(1500);
         const dolly = new THREE.Group();
@@ -506,62 +483,42 @@
         function start() {
             ui.hideOverlay();
 
-            landscapeFOV = 70;
-            mobileFOV = 110;
-            const targetFOV = camera.aspect > 0 ? landscapeFOV : mobileFOV;
-
             sfx.effects.shriek.play();
 
             sfx.effects.storm.setLoop(true);
             sfx.effects.storm.setVolume(0.5);
-            setTimeout(() => {
-                sfx.effects.storm.play();
-
-                // controls.autoRotate = true;
-                // controls.autoRotateSpeed = -1;
-            }, 3400);
+            setTimeout(() => sfx.effects.storm.play(), 3400);
 
             /* Start render loop */
             cancelAnimationFrame(introRender);
-            if (vr.state === 'ready') {
-                renderLoopVR();
-                // renderer.vr.enabled = true;
-                // vr.startSession();
-            } else {
-                // controls = new OrbitControls(camera, canvas);
-                // controls.enableZoom = false;
-                // controls.enablePan = false;
-                // // controls.autoRotate = true;
-                // controls.target = new THREE.Vector3(0, 0.6, 0);
-                // window.controls = controls;
-                renderLoop360(controls);
-            }
+            renderLoop();
 
-            // const fog = new THREE.Fog(0xffffff, 0.1, 200);
-            // if (vr.state === 'not-available') {
-            //     scene.fog = fog;
-            // }
             setTimeout(() => {
-                const startFov = camera.fov;
+                landscapeFOV = 70;
+                portraitFOV = 110;
+                const targetFOV = camera.aspect >= 1 ? landscapeFOV : portraitFOV;
+                const startFOV = camera.fov;
                 const startPos = Object.assign({}, camera.position);
-                let newStartPos;
                 animate(2000, 30, (n) => {
-                    let x;
-                    let y;
-                    let z;
-                        x = tween(startPos.x, -2, n);
-                        y = tween(startPos.y, 1.3, n);
-                        z = tween(startPos.z, -2, n);
-                        camera.fov = tween(startFov, targetFOV, n);
-                        camera.position.set(x, y, z);
-                    const rotSpeed = (180 / 180) * Math.PI * n;
+                    const x = tween(startPos.x, -2, n);
+                    const y = tween(startPos.y, 1.3, n);
+                    const z = tween(startPos.z, -2, n);
+
+                    const rotSpeed = Math.PI * n;
                     camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
+                    camera.position.y = y;
                     camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
 
+                    camera.fov = tween(startFOV, targetFOV, n);
                     camera.lookAt(0, 0.6, 0);
                     camera.updateProjectionMatrix();
-                    // fog.far = tween(200, 0.1, n);
+
+                    /* Fill light */
+                    bloom.threshold = tween(1, 0, n);
+                    bloom.strength = tween(0, 1, n);
                 }, EasingFunctions.easeInQuad).then(() => {
+                    bloom.threshold = 0;
+                    bloom.strength = 2;
                     if (vr.state === 'ready') {
                         renderer.vr.enabled = true;
                         dolly.add(camera);
@@ -582,24 +539,22 @@
                         );
                         controls.enableZoom = false;
                         controls.enablePan = false;
-                        // controls.autoRotate = true;
                         window.controls = controls;
                     }
                     setTimeout(() => {
-                        animate(3000, 30, (n) => {
-                            // fog.far = tween(0.1, 200, n);
+                        animate(2000, 30, (n) => {
+                            bloom.strength = tween(2, 0, n);
                         }).then(() => {
-                            scene.fog = null;
+                            setTimeout(startRain, 12000);
                         });
-                        setTimeout(switchScenes, 10000);
                     }, 1000);
                 });
             }, vr.state === 'ready' ? 1200 : 1300);
         }
 
         /* Throttled render loop for the intro screen */
-        function introRenderLoop() {
-            const interval = 1000 / 5;
+        function introRenderLoop(maxFPS = 5) {
+            const interval = 1000 / maxFPS;
             let lastRun = 0;
             const loop = (now) => {
                 if (now - lastRun >= interval) {
@@ -611,42 +566,44 @@
             introRender = requestAnimationFrame(loop);
         }
 
-        function renderLoopVR() {
+        function renderLoop() {
             renderer.setAnimationLoop((time) => {
-                particles.forEach(p => p.update(time));
                 drops.update(time);
+                if (controls) {
+                    controls.update();
+                }
                 renderer.render(scene, camera);
             });
         }
 
-        function renderLoop360() {
-            const loop = (time) => {
-                particles.forEach(p => p.update(time));
-                drops.update(time);
-                if (controls) controls.update();
-                renderer.render(scene, camera);
-                return requestAnimationFrame(loop);
-            };
-            return requestAnimationFrame(loop);
-        }
+        // function renderLoop360() {
+        //     const loop = (time) => {
+        //         drops.update(time);
+        //         controls.update();
+        //         renderer.render(scene, camera);
+        //         return requestAnimationFrame(loop);
+        //     };
+        //     return requestAnimationFrame(loop);
+        // }
 
-        // const axesHelper = new THREE.AxesHelper( 5 );
-        // scene.add( axesHelper );
-
-        function switchScenes() {
+        function startRain() {
             scene.add(drops.mesh);
 
             sfx.effects.storm.stop();
             sfx.effects.drop.play();
 
-            particles.forEach(p => p.show());
-            bloom.strength = 1.0;
-            bloom.threshold = 0.22;
             window.bloom = bloom;
 
+            bloom.threshold = 0.22;
             if (vr.state !== 'not-available') {
+                bloom.strength = 1.3;
+
+                /* Center the camera */
                 dolly.position.set(0, 0, 0);
             } else {
+                bloom.strength = 1.0;
+
+                /* Reconfigure orbit controls */
                 camera.fov = 70;
                 camera.position.set(0, 0, 0);
                 controls.enableZoom = true;
@@ -665,9 +622,9 @@
                 }, 8000);
             }, 1000);
 
-            animate(1500, 30, (n) => {
+            animate(2000, 30, (n) => {
                 const rN = 1 - n;
-                construct.object.position.y = tween(0, -20, n);
+                construct.object.position.y = tween(0, -50, n);
                 scene.background.setRGB(rN, rN, rN);
             }, EasingFunctions.easeOutQuad).then(() => {
                 scene.remove(construct.object);
