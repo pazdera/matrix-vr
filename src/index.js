@@ -235,6 +235,8 @@ function startRain() {
     scene.add(drops.mesh);
 
     sfx.effects.storm.stop();
+
+    sfx.effects.drop.setVolume(0.7);
     sfx.effects.drop.play();
 
     bloom.threshold = 0.22;
