@@ -5,8 +5,9 @@
 
 ![Intro Screen](https://user-images.githubusercontent.com/169328/62210934-3d36a080-b395-11e9-93b6-11d873686f34.png)
 
-![Digital Rain Gif](https://user-images.githubusercontent.com/169328/62211026-6f480280-b395-11e9-9d64-cd059663054b.gif)
-
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/169328/62211026-6f480280-b395-11e9-9d64-cd059663054b.gif">
+</p>
 
 Three.js, I ended up bundling a custom build of three.js with a few minor modifications, so if you see a weird issue, it's probably my fault.
 
