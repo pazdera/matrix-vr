@@ -31,7 +31,7 @@ I also used sound effects by these awesome people:
 
 The fonts are [IBM Plex](https://www.ibm.com/plex/) and [Source Sans Pro](https://fonts.google.com/specimen/Source+Sans+Pro).
 
-Thank you!
+Thank you all!
 
 ## Future Work
 
