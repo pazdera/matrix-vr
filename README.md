@@ -35,11 +35,11 @@ Thank you!
 
 ## Future Work
 
-* **Add support for controllers** -- The original idea was to change the scene only after the user picks up the red pill. I didn't get around to it yet.
-* **Randomise the digital rain more** -- I was hitting some performance issues, but I'm pretty sure the shader could be improved to make the drops more random.
-* **Test with more headsets** -- It would be great to know whether this works on Vive/Rift/GearVR etc.
-* **Anti-aliasing** -- The renderer flag didn't work for me. The FXAA pass was giving me weird flickering results in VR, probably because of something stupid.
-* **Refactoring** -- The project came out of many hours of experiments within a single file called _texture_shader.html_. You can imagine, it took me a while to untangle :D. There's always more to be done...
+* **Add support for controllers** — The original idea was to change the scene only after the user picks up the red pill. I didn't get around to it yet.
+* **Randomise the digital rain more** — I was hitting some performance issues, but I'm pretty sure the shader could be improved to make the drops more random.
+* **Test with more headsets** — It would be great to know whether this works on Vive/Rift/GearVR etc.
+* **Anti-aliasing** — The renderer flag didn't work for me. The FXAA pass was giving me weird flickering results in VR, probably because of something stupid.
+* **Refactoring** — The project came out of many hours of experiments within a single file called _texture_shader.html_. You can imagine, it took me a while to untangle :D. There's always more to be done...
 
 ## Development
 
