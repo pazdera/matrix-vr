@@ -1,6 +1,6 @@
 # Inside the Matrix VR
 
-[![MIT](https://img.shields.io/github/license/pazdera/matrix-vr)](https://github.com/pazdera/matrix-vr/blob/master/LICENSE) [![website](https://img.shields.io/website/https/radek.io/matrix-vr)](https://radek.io/matrix-vr/)
+[![MIT](https://img.shields.io/github/license/pazdera/matrix-vr#refresh)](https://github.com/pazdera/matrix-vr/blob/master/LICENSE) [![website](https://img.shields.io/website/https/radek.io/matrix-vr)](https://radek.io/matrix-vr/)
 
 <p align="center">
   <img width="640" src="https://user-images.githubusercontent.com/169328/62210934-3d36a080-b395-11e9-93b6-11d873686f34.png">
