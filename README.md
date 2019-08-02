@@ -18,7 +18,7 @@ Have an idea how to make this better? Submit an [issue](https://github.com/pazde
 
 ## Credits
 
-To build the construct, I used [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) models by [Rodrigo Villani](https://sketchfab.com/rvillani) and [Sirenko](https://sketchfab.com/sirenko).
+In the construct, I used the incredibly detailed models by [Rodrigo Villani](https://sketchfab.com/rvillani) and [Sirenko](https://sketchfab.com/sirenko) available under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/).
 
 For the digital rain, I stole the [msdf font](https://github.com/Rezmason/matrix/blob/master/matrixcode_msdf.png) and some other ideas from Rezmason's much more polished [2D version](https://github.com/Rezmason/matrix).
 
@@ -30,6 +30,8 @@ I also used sound effects by these awesome people:
 * [Matrix Sound 01](https://freesound.org/people/Julien%20Matthey/sounds/105017/) by Julien Matthey
 
 The fonts are [IBM Plex](https://www.ibm.com/plex/) and [Source Sans Pro](https://fonts.google.com/specimen/Source+Sans+Pro).
+
+And the rest of it is [three.js](https://threejs.org/) which makes working with WebGL really way easier than it should be 🚀.
 
 Thank you all!
 
