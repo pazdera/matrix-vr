@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three/build/three.module.js';
-import { GLTFLoader } from '../vendor/three/examples/jsm/loaders/GLTFloader.js';
+import { GLTFLoader } from '../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 
 const MODELS = {
     chair: '/assets/models/chair/scene.gltf',
