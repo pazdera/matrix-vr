@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "express": "^4.19.2",
-    "gh-pages": "^2.0.1",
+    "gh-pages": "^5.0.0",
     "replace-in-file": "^4.1.1",
     "rollup": "^1.17.0",
     "rollup-plugin-copy": "^3.1.0",
